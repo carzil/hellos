@@ -1,5 +1,6 @@
 #include "apic.h"
 #include "panic.h"
+#include "paging.h"
 
 #define TYPE_LAPIC          0
 #define TYPE_IOAPIC         1
@@ -122,6 +123,9 @@ void apic_init(struct acpi_sdt* rsdt) {
     if (!lapic_ptr) {
         panic("cannot locate Local APIC address");
     }
+
+    identity_map(lapic_ptr, 2 * PAGE_SIZE);
+    identity_map(ioapic_ptr, 2 * PAGE_SIZE);
 
     // Disable old PIC.
     outb(0x20 + 1, 0xFF);

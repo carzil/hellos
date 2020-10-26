@@ -6,8 +6,10 @@
 #include "gdt.h"
 #include "acpi.h"
 #include "apic.h"
+#include "irq.h"
 #include "vga.h"
 #include "panic.h"
+#include "paging.h"
 #include "spinlock.h"
 
 
@@ -44,7 +46,10 @@ void kernel_main(void) {
     init_gdt();
     init_idt();
 
-	terminal_initialize();
+    init_kalloc_early();
+    init_kernel_paging();
+
+    terminal_initialize();
     terminal_writestring_color("HeLL OS is loaded.\n", vga_entry_color(VGA_COLOR_GREEN, VGA_COLOR_BLACK));
     struct acpi_sdt* rsdt = acpi_find_rsdt();
     if (!rsdt) {
@@ -53,6 +58,9 @@ void kernel_main(void) {
 
     apic_init(rsdt);
 
-    asm ("sti");
-    // jump_userspace();
+    enable_irq();
+    *(uint32_t*)0xdeadbeef = 0;
+    for (;;) {
+        asm volatile ("hlt");
+    }
 }

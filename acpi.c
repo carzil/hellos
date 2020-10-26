@@ -1,5 +1,6 @@
 #include "acpi.h"
 #include "common.h"
+#include "paging.h"
 
 static struct acpi_rsdp* find_rsdp_in_region(void* start, size_t len) {
     for (size_t i = 0; i < len - 8; i++) {
@@ -13,23 +14,27 @@ static struct acpi_rsdp* find_rsdp_in_region(void* start, size_t len) {
 
 struct acpi_sdt* acpi_find_rsdt() {
     // 1KB of EBDA.
-    void* ebda_addr = (void*)((*(uint16_t*)0x40e) << 4);
+    void* ebda_addr = phys2virt((void*)((*(uint16_t*)phys2virt((void*)0x40e)) << 4));
     struct acpi_rsdp* rsdp = find_rsdp_in_region(ebda_addr, 1024);
     if (!rsdp) {
         // Static memory region.
-        rsdp = find_rsdp_in_region((void*)0xe0000, 0xfffff - 0xe0000);
+        rsdp = find_rsdp_in_region(phys2virt((void*)0xe0000), 0xfffff - 0xe0000);
     }
 
     if (!rsdp) {
         return NULL;
     }
-    return (struct acpi_sdt*)rsdp->rsdt_addr;
+
+    void* rsdt_addr = (void*)rsdp->rsdt_addr;
+    identity_map(rsdt_addr, PAGE_SIZE);
+    return (struct acpi_sdt*)rsdt_addr;
 }
 
 struct acpi_sdt* acpi_find_sdt(struct acpi_sdt* root, const char* signature) {
     size_t sz = (root->header.length - sizeof(root->header)) / 4;
     for (size_t i = 0; i < sz; i++) {
         if (memcmp(signature, &root->entries[i]->header.signature, 4) == 0) {
+            identity_map(root->entries[i], 2 * PAGE_SIZE);
             return root->entries[i];
         }
     }

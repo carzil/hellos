@@ -1,3 +1,5 @@
-file kernel.bin
+symbol-file kernel.sym
 tar rem :1234
-
+b *0x80101a5c
+b pagefault_isr
+c
