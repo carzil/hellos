@@ -12,7 +12,7 @@ static inline int memcmp(const void* str1, const void* str2, size_t count) {
     return 0;
 }
 
-static inline memset(void* p, int ch, size_t sz) {
+static inline void memset(void* p, int ch, size_t sz) {
     uint8_t* ptr = (uint8_t*)p;
     while (sz > 0) {
         *ptr = ch;
@@ -28,3 +28,5 @@ static inline size_t strlen(const char* str) {
     }
 	return len;
 }
+
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))

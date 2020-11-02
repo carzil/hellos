@@ -4,7 +4,7 @@ KERNEL_HIGH = 0x80000000;
 
 SECTIONS
 {
-    . = 0x00100000;
+    . = 1M;
 
     .multiboot : {
         KEEP(*(.multiboot))
@@ -15,28 +15,37 @@ SECTIONS
     }
 
 	. += KERNEL_HIGH;
+    . = ALIGN(0x1000);
 
     PROVIDE(KERNEL_START = .);
-	.text ALIGN(0x1000) : AT(ADDR(.text) - KERNEL_HIGH) {
+	.text : AT(ADDR(.text) - KERNEL_HIGH) {
 		*(.text)
 	}
 
-	.rodata ALIGN(0x1000) : AT(ADDR(.rodata) - KERNEL_HIGH) {
+	.rodata : AT(ADDR(.rodata) - KERNEL_HIGH) {
 		*(.rodata)
 	}
 
-	.data ALIGN(0x1000) : AT(ADDR(.data) - KERNEL_HIGH) {
+	.data : AT(ADDR(.data) - KERNEL_HIGH) {
 		*(.data)
 	}
 
-	.bss ALIGN(0x1000) : AT(ADDR(.bss) - KERNEL_HIGH) {
+	.bss : AT(ADDR(.bss) - KERNEL_HIGH) {
 		*(COMMON)
 		*(.bss)
 	}
     PROVIDE(KERNEL_END = .);
 
+    . += 4M;
+    . = ALIGN(0x1000);
+    PROVIDE(USERSPACE_START = .);
+    .userspace.text : AT(ADDR(.userspace.text) - KERNEL_HIGH) {
+		*(.userspace.text)
+	}
+
     /DISCARD/ : {
 		*(.eh_frame)
         *(.note.gnu.*)
+        *(.dynamic)
 	}
 }

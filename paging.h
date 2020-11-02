@@ -19,6 +19,7 @@
 extern char KERNEL_HIGH[];
 extern char KERNEL_END[];
 extern char KERNEL_START[];
+extern char USERSPACE_START[];
 
 static inline void* virt2phys(void* addr) {
     return (void*)((uint32_t)addr - (uint32_t)&KERNEL_HIGH[0]);

@@ -51,7 +51,7 @@ void kfree(void* p) {
     // ...
 }
 
-uint32_t* alloc_page(uint32_t* pgdir, void* addr) {
+uint32_t* alloc_page(uint32_t* pgdir, void* addr, int user) {
     uint32_t* page_table = NULL;
     if (pgdir[PGDIR_IDX(addr)] & PT_PRESENT) {
         page_table = phys2virt((void*)ROUNDDOWN(pgdir[PGDIR_IDX(addr)]));
@@ -65,21 +65,23 @@ uint32_t* alloc_page(uint32_t* pgdir, void* addr) {
         }
     }
 
-    pgdir[PGDIR_IDX(addr)] = ((uint32_t)virt2phys(page_table)) | PT_PRESENT | PT_WRITEABLE;
+    int flags = PT_PRESENT;
+    if (user) {
+        flags |= PT_USER;
+    }
+    pgdir[PGDIR_IDX(addr)] = ((uint32_t)virt2phys(page_table)) | flags;
     return &page_table[PT_IDX(addr)];
 }
 
-void map_continous(uint32_t* pgdir, void* addr, size_t size, void* phys_addr, int writeable) {
+void map_continous(uint32_t* pgdir, void* addr, size_t size, void* phys_addr, int flags) {
     addr = (void*)ROUNDDOWN((uint32_t)addr);
     phys_addr = (void*)ROUNDDOWN((uint32_t)phys_addr);
     size = ROUNDUP(size);
 
     while (size > 0) {
-        uint32_t* pte = alloc_page(pgdir, addr);
+        uint32_t* pte = alloc_page(pgdir, addr, flags & PT_USER);
         *pte = ((uint32_t)phys_addr) | PT_PRESENT;
-        if (writeable) {
-            *pte |= PT_WRITEABLE;
-        }
+        *pte |= flags;
         addr += PAGE_SIZE;
         phys_addr += PAGE_SIZE;
         size -= PAGE_SIZE;
@@ -100,12 +102,13 @@ void load_cr3(uint32_t* pgdir) {
 void init_kernel_paging() {
     kernel_pgdir = kalloc();
     memset(kernel_pgdir, '\0', PAGE_SIZE);
-    map_continous(kernel_pgdir, &KERNEL_HIGH[0], 4 * (1 << 20), 0x0, 1);
+    map_continous(kernel_pgdir, &KERNEL_HIGH[0], 4 * (1 << 20), 0x0, PT_WRITEABLE);
+    map_continous(kernel_pgdir, &USERSPACE_START, 4096, virt2phys(&USERSPACE_START), PT_USER | PT_WRITEABLE);
     load_cr3(virt2phys(kernel_pgdir));
 }
 
 void identity_map(void* addr, size_t sz) {
-    map_continous(kernel_pgdir, addr, sz, addr, 1);
+    map_continous(kernel_pgdir, addr, sz, addr, PT_WRITEABLE);
 }
 
 uint32_t read_cr2() {
@@ -117,11 +120,8 @@ uint32_t read_cr2() {
     return val;
 }
 
-__attribute__ ((interrupt)) void pagefault_isr(struct iframe* frame, uint32_t error_code) {
-    (void)frame;
-    (void)error_code;
-
-    *(uint32_t*)0xdeadbeef = 0;
+void pagefault_irq(struct regs* regs) {
+    (void)regs;
 
     void* addr = (void*)read_cr2();
     void* new_page = kalloc();
