@@ -1,6 +1,6 @@
 symbol-file kernel.sym
 tar rem :1234
-b syscall_irq
-la regs
+b kernel_main
+la src
 foc cmd
 c

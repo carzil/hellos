@@ -105,11 +105,9 @@ void apic_init(struct acpi_sdt* rsdt) {
 
         switch (entry->type) {
             case TYPE_LAPIC:
-                terminal_writestring("found LAPIC\n");
                 break;
             case TYPE_IOAPIC:
                 ioapic_ptr = (volatile struct ioapic*)(*(uint32_t*)(&entry->data[2]));
-                terminal_writestring("found I/O APIC\n");
                 break;
         }
 
@@ -146,8 +144,6 @@ void apic_init(struct acpi_sdt* rsdt) {
     lapic_write(APIC_TMRINITCNT, 10000000);
 
     ioapic_enable(1, 40);
-
-    terminal_writestring("APIC is initialized\n");
 }
 
 void apic_eoi() {

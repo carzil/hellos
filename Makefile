@@ -1,5 +1,5 @@
 AS=gcc -m32 -c -g -mgeneral-regs-only
-CC=gcc -m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -Wall -Wextra -static-libgcc -O2
+CC=gcc -m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -fno-pie -Wall -Wextra -static-libgcc
 LD=gcc -m32 -fno-pic -Wl,-static -Wl,-Bsymbolic -nostartfiles
 OBJCOPY=objcopy
 
@@ -10,8 +10,8 @@ ASM_OBJS    := $(ASM_SOURCES:.S=.S.o)
 
 image: build
 	mkdir -p isodir/boot/grub
-	cp grub.cfg isodir/boot/grub/grub.cfg
-	cp kernel.bin isodir/boot/kernel.bin && grub-mkrescue -o kernel.iso isodir
+	cp grub.cfg isodir/boot/grub
+	cp kernel.bin isodir/boot && grub-mkrescue -o kernel.iso isodir
 	rm -rf isodir
 
 build: .c-depend .S-depend $(C_OBJS) $(ASM_OBJS)

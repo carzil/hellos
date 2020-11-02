@@ -22,13 +22,15 @@ void kernel_main(void) {
     init_kernel_paging();
 
     terminal_initialize();
-    terminal_writestring_color("HeLL OS is loaded.\n", vga_entry_color(VGA_COLOR_GREEN, VGA_COLOR_BLACK));
+
     struct acpi_sdt* rsdt = acpi_find_rsdt();
     if (!rsdt) {
         panic("RSDT not found!");
     }
 
     apic_init(rsdt);
+
+    printk("Hell OS is loaded\n");
 
     scheduler_start();
 }

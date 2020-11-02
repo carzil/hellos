@@ -1,6 +1,7 @@
 #include "paging.h"
 #include "common.h"
 #include "panic.h"
+#include "irq.h"
 
 #include <stdint.h>
 
@@ -124,9 +125,8 @@ void pagefault_irq(struct regs* regs) {
     (void)regs;
 
     void* addr = (void*)read_cr2();
-    void* new_page = kalloc();
-    if (!new_page) {
-        panic("cannot allocate new page");
+
+    if (!is_userspace(regs)) {
+        panic("pagefault in kernel space\n    cr2=0x%x, eip=0x%x, err_code=%d", addr, regs->eip, regs->error_code);
     }
-    map_continous(kernel_pgdir, addr, PAGE_SIZE, virt2phys(new_page), 1);
 }

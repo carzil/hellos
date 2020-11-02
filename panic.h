@@ -1,14 +1,16 @@
 #pragma once
 
-#include "vga.h"
-#include "irq.h"
+#include <stdarg.h>
 
-static inline void panic(const char* msg) {
-    terminal_writestring_color("PANIC: ", vga_entry_color(VGA_COLOR_RED, VGA_COLOR_BLACK));
-    terminal_writestring_color(msg, vga_entry_color(VGA_COLOR_RED, VGA_COLOR_BLACK));
+#include "printk.h"
 
-    disable_irq();
-    for (;;) {
-        asm volatile ("hlt");
-    }
-}
+
+#define S1(x) #x
+#define S2(x) S1(x)
+
+void __panic(const char* location, const char* msg, ...);
+
+#define panic(msg, ...) __panic(__FILE__ ":" S2(__LINE__), msg __VA_OPT__(,) __VA_ARGS__)
+
+#define BUG_ON(expr) if (expr) { panic("assetion '" #expr "' failed"); }
+#define BUG_ON_NULL(expr) BUG_ON(expr == NULL)
