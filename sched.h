@@ -24,11 +24,12 @@ struct task {
     struct regs* regs;
     void* kstack;
     int ticks_remaining;
+    int exitcode;
 };
 
 extern struct task* current;
 
 struct task* task_create();
 void scheduler_start();
-void scheduler_tick();
+void scheduler_tick(struct regs* regs);
 void reschedule();

@@ -11,5 +11,5 @@ void timer_irq(struct regs* regs) {
     __sync_fetch_and_add(&timer_ticks, 1);
     apic_eoi();
 
-    scheduler_tick();
+    scheduler_tick(regs);
 }

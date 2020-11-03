@@ -115,7 +115,7 @@ void scheduler_start() {
     }
 }
 
-void scheduler_tick() {
+void scheduler_tick(struct regs* regs) {
     for (size_t i = 0; i < MAX_TASKS; i++) {
         if (tasks[i].state == TASK_WAITING) {
             tasks[i].ticks_remaining--;

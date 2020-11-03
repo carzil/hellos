@@ -12,8 +12,6 @@
 #include "paging.h"
 #include "sched.h"
 
-extern void jump_userspace();
-
 void kernel_main(void) {
     init_gdt();
     init_idt();
