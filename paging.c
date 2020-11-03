@@ -21,13 +21,13 @@ __attribute__((section(".boot.text"))) void setup_paging_early() {
     // 0x0...4Mb identity mapped
     // KERNEL_HIGH...KERNEL_HIGH+4Mb mapped to 0x0...4Mb
     early_pgdir[0] = PT_PRESENT | PT_WRITEABLE | PT_PAGE_SIZE;
-    early_pgdir[PGDIR_IDX(&KERNEL_HIGH)] = PT_PRESENT | PT_WRITEABLE | PT_PAGE_SIZE;
+    early_pgdir[PGDIR_IDX(KERNEL_HIGH)] = PT_PRESENT | PT_WRITEABLE | PT_PAGE_SIZE;
 }
 
 void init_kalloc_early() {
     void* addr = (void*)ROUNDUP((uint32_t)&KERNEL_END);
     kalloc_head.freelist_head = NULL;
-    void* end = &KERNEL_HIGH[0] + 4 * (1 << 20);
+    void* end = KERNEL_HIGH + 4 * (1 << 20);
     while (addr < end) {
         struct fl_entry* entry = (struct fl_entry*)addr;
         entry->next = kalloc_head.freelist_head;
@@ -103,7 +103,7 @@ void load_cr3(uint32_t* pgdir) {
 void init_kernel_paging() {
     kernel_pgdir = kalloc();
     memset(kernel_pgdir, '\0', PAGE_SIZE);
-    map_continous(kernel_pgdir, &KERNEL_HIGH[0], 4 * (1 << 20), 0x0, PT_WRITEABLE);
+    map_continous(kernel_pgdir, (void*)KERNEL_HIGH, 4 * (1 << 20), 0x0, PT_WRITEABLE);
     map_continous(kernel_pgdir, &USERSPACE_START, 4096, virt2phys(&USERSPACE_START), PT_USER | PT_WRITEABLE);
     load_cr3(virt2phys(kernel_pgdir));
 }

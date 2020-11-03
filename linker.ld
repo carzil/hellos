@@ -1,6 +1,6 @@
 ENTRY(_start_early)
 
-KERNEL_HIGH = 0x80000000;
+#include "defs.h"
 
 SECTIONS
 {
@@ -14,38 +14,42 @@ SECTIONS
         *(.boot.text)
     }
 
-	. += KERNEL_HIGH;
+    .boot.bss : {
+        *(.boot.bss)
+    }
+
+    . += KERNEL_HIGH;
     . = ALIGN(0x1000);
 
     PROVIDE(KERNEL_START = .);
-	.text : AT(ADDR(.text) - KERNEL_HIGH) {
-		*(.text)
-	}
+    .text : AT(ADDR(.text) - KERNEL_HIGH) {
+        *(.text)
+    }
 
-	.rodata : AT(ADDR(.rodata) - KERNEL_HIGH) {
-		*(.rodata)
-	}
+    .rodata : AT(ADDR(.rodata) - KERNEL_HIGH) {
+        *(.rodata)
+    }
 
-	.data : AT(ADDR(.data) - KERNEL_HIGH) {
-		*(.data)
-	}
+    .data : AT(ADDR(.data) - KERNEL_HIGH) {
+        *(.data)
+    }
 
-	.bss : AT(ADDR(.bss) - KERNEL_HIGH) {
-		*(COMMON)
-		*(.bss)
-	}
+    .bss : AT(ADDR(.bss) - KERNEL_HIGH) {
+        *(COMMON)
+        *(.bss)
+    }
     PROVIDE(KERNEL_END = .);
 
     . += 4M;
     . = ALIGN(0x1000);
     PROVIDE(USERSPACE_START = .);
     .userspace.text : AT(ADDR(.userspace.text) - KERNEL_HIGH) {
-		*(.userspace.text)
-	}
+        *(.userspace.text)
+    }
 
     /DISCARD/ : {
-		*(.eh_frame)
+        *(.eh_frame)
         *(.note.gnu.*)
         *(.dynamic)
-	}
+    }
 }

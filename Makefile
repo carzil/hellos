@@ -2,6 +2,7 @@ AS=gcc -m32 -c -g -mgeneral-regs-only
 CC=gcc -m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -fno-pie -Wall -Wextra -static-libgcc
 LD=gcc -m32 -fno-pic -Wl,-static -Wl,-Bsymbolic -nostartfiles
 OBJCOPY=objcopy
+SHELL := /bin/bash
 
 C_SOURCES   := $(shell find $(SUBSYSTEMS) -name "*.c")
 ASM_SOURCES := $(shell find $(SUBSYSTEMS) -name "*.S")
@@ -14,8 +15,8 @@ image: build
 	cp kernel.bin isodir/boot && grub-mkrescue -o kernel.iso isodir
 	rm -rf isodir
 
-build: .c-depend .S-depend $(C_OBJS) $(ASM_OBJS)
-	$(LD) -T linker.ld -o kernel.bin -ffreestanding -O2 -nostdlib -lgcc $(ASM_OBJS) $(C_OBJS)
+build: .c-depend .S-depend $(C_OBJS) $(ASM_OBJS) linker.ld
+	$(LD) -T <(cpp -P -E linker.ld) -o kernel.bin -ffreestanding -O2 -nostdlib -lgcc $(ASM_OBJS) $(C_OBJS)
 	$(OBJCOPY) --only-keep-debug kernel.bin kernel.sym
 	$(OBJCOPY) --strip-debug kernel.bin
 
