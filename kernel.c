@@ -11,6 +11,7 @@
 #include "panic.h"
 #include "paging.h"
 #include "sched.h"
+#include "pci.h"
 
 void kernel_main(void) {
     init_gdt();
@@ -29,6 +30,8 @@ void kernel_main(void) {
     apic_init(rsdt);
 
     printk("Hell OS is loaded\n");
+
+    pci_print_devices();
 
     scheduler_start();
 }

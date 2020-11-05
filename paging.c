@@ -5,7 +5,7 @@
 
 #include <stdint.h>
 
-uint32_t early_pgdir[1024] __attribute__((aligned(4096)));
+uint32_t early_pgdir[1024] __attribute__((aligned(4096), section(".boot.bss")));
 
 struct fl_entry {
     struct fl_entry* next;

@@ -21,7 +21,6 @@ stack_top:
 .extern kernel_main
 .extern setup_paging_early
 .extern early_pgdir
-.extern KERNEL_HIGH
 
     .section .boot.text, "ax"
     .global _start_early
