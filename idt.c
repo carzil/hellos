@@ -65,6 +65,8 @@ void init_idt() {
     REGISTER_IRQ(32,  timer_irq,     0x08, GATE_INTERRUPT);
     REGISTER_IRQ(39,  spurious_irq,  0x08, GATE_INTERRUPT);
     REGISTER_IRQ(40,  keyboard_irq,  0x08, GATE_INTERRUPT);
+    REGISTER_IRQ(41,  ide_irq1,      0x08, GATE_INTERRUPT);
+    REGISTER_IRQ(42,  ide_irq2,      0x08, GATE_INTERRUPT);
     REGISTER_IRQ(128, syscall_irq,   0x08, GATE_TRAP | DPL_USER);
 
     asm volatile (

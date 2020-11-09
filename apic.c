@@ -144,6 +144,8 @@ void apic_init(struct acpi_sdt* rsdt) {
     lapic_write(APIC_TMRINITCNT, 10000000);
 
     ioapic_enable(1, 40);
+    ioapic_enable(14, 41);
+    ioapic_enable(15, 42);
 }
 
 void apic_eoi() {

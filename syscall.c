@@ -5,6 +5,7 @@
 #include "timer.h"
 #include "sched.h"
 #include "bug.h"
+#include "ata.h"
 
 uint32_t syscall_wait(struct regs* regs) {
     int ticks = regs->ebx;
@@ -19,12 +20,35 @@ uint32_t syscall_wait(struct regs* regs) {
 }
 
 uint32_t syscall_print(struct regs* regs) {
-    terminal_writestring(".");
+    switch (regs->ebx) {
+    case 1:
+        terminal_writestring("1");
+        break;
+    case 2:
+        terminal_writestring("2");
+        break;
+    case 3:
+        terminal_writestring("3");
+        break;
+    case 4:
+        terminal_writestring("4");
+        break;
+    default:
+        terminal_writestring("x");
+        break;
+    }
+    return 0;
+}
+
+uint32_t syscall_read(struct regs* regs) {
+    uint16_t sector[4 * 256];
+    return ata_read(&sector, 12, 4);
 }
 
 syscall_fn syscall_table[] = {
     [0] = syscall_wait,
     [1] = syscall_print,
+    [2] = syscall_read,
 };
 
 

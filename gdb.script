@@ -1,6 +1,5 @@
 symbol-file kernel.sym
 tar rem :1234
-b _start_early
 la regs
 foc cmd
 c

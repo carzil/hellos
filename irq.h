@@ -29,6 +29,33 @@ static inline void enable_irq() {
     asm volatile ("sti");
 }
 
+static inline void disable_irq_safe(int* state) {
+    uint32_t flags = 0;
+    asm volatile (
+        "pushf\n"
+        "pop %0\n"
+        : "=r"(flags)
+        :
+    );
+    *state = flags & (1 << 9);
+    if (!*state) {
+        disable_irq();
+    }
+}
+
+static inline void restore_irq(int state) {
+    if (state) {
+        enable_irq();
+    }
+}
+
 static inline int is_userspace(struct regs* regs) {
     return (regs->cs & 0b11) == 0b11;
 }
+
+#define DISABLE_IRQ_BEGIN   \
+    int __irq_state = 0;    \
+    disable_irq_safe(&__irq_state);
+
+#define DISABLE_IRQ_END \
+    restore_irq(__irq_state);

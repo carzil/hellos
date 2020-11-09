@@ -23,6 +23,17 @@ static inline void memset(void* p, int ch, size_t sz) {
     }
 }
 
+static inline void memcpy(void* dst, void* src, size_t sz) {
+    uint8_t* d = dst;
+    const uint8_t* s = src;
+    while (sz > 0) {
+        *d = *s;
+        d++;
+        s++;
+        sz--;
+    }
+}
+
 static inline size_t strlen(const char* str) {
 	size_t len = 0;
 	while (str[len]) {

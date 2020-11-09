@@ -7,6 +7,7 @@ typedef enum state {
     TASK_NOT_ALLOCATED = 0,
     TASK_RUNNING       = 1,
     TASK_WAITING       = 2,
+    TASK_DISK_READ     = 3,
 } state_t;
 
 struct context {

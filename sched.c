@@ -6,6 +6,7 @@
 #include "panic.h"
 #include "gdt.h"
 #include "bug.h"
+#include "init.h"
 
 #define MAX_TASKS          256
 #define KERNEL_STACK_SIZE  4096
@@ -14,13 +15,16 @@ static struct task tasks[MAX_TASKS];
 
 // First function in task, will return to __jump_userspace.
 static void task_init() {
+    if (current->pid == 1) {
+        init_late();
+    }
 }
 
 extern void userspace_fn();
 extern void __jump_userspace();
 
 static int task_setup(int pid) {
-    struct task* task = &tasks[pid];
+    struct task* task = &tasks[pid - 1];
     task->pid = pid;
     task->state = TASK_RUNNING;
     task->kstack = kalloc();
@@ -58,7 +62,7 @@ static int task_setup(int pid) {
 int task_allocate(struct task** res) {
     for (size_t i = 0; i < MAX_TASKS; i++) {
         if (tasks[i].state == TASK_NOT_ALLOCATED) {
-            int err = task_setup(i);
+            int err = task_setup(i + 1);
             if (err != 0) {
                 return err;
             }
