@@ -38,7 +38,7 @@ static inline void disable_irq_safe(int* state) {
         :
     );
     *state = flags & (1 << 9);
-    if (!*state) {
+    if (*state) {
         disable_irq();
     }
 }
