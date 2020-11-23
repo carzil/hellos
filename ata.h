@@ -14,6 +14,9 @@ struct prdt_entry {
 struct ata_dev {
     uint16_t io_base;
     uint16_t io_ctrl_base;
+    uint16_t bar4;
+    void* dma_buf;
+    struct prdt_entry* prdt;
 };
 
 #define ATA_REG(dev, offset) ((dev)->io_base + offset)
@@ -28,7 +31,11 @@ struct ata_dev {
 #define ATA_COMMAND_REG(dev)    ATA_REG(dev, 7)
 #define ATA_STATUS_REG(dev)     ATA_REG(dev, 7)
 #define ATA_ALT_STATUS_REG(dev) ((dev)->io_ctrl_base + 0)
-#define ATA_CONTROL_REG(dev) ((dev)->io_ctrl_base + 0)
+#define ATA_CONTROL_REG(dev)    ((dev)->io_ctrl_base + 0)
+
+#define BMR_COMMAND_REG(dev)    ((dev)->bar4)
+#define BMR_STATUS_REG(dev)     ((dev)->bar4 + 2)
+#define BMR_PRDT_REG(dev)       ((dev)->bar4 + 4)
 
 #define ATA_ERR_AMNF     (1 << 0)
 #define ATA_ERR_TKZNF    (1 << 1)
@@ -45,6 +52,7 @@ struct ata_dev {
 
 #define ATA_CMD_IDENTIFY      0xec
 #define ATA_CMD_READ_SECTORS  0x20
+#define ATA_CMD_READ_DMA      0xc8
 
 #define ATA_SELECT_MASTER 0xa0
 

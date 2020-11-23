@@ -2,4 +2,5 @@ symbol-file kernel.sym
 tar rem :1234
 la regs
 foc cmd
+b ata.c:71
 c

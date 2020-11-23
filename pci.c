@@ -83,3 +83,11 @@ int pci_find_device(struct pci_dev* pci_dev, uint8_t class, uint8_t subclass) {
 
     return 0;
 }
+
+uint32_t pci_read_bar4(struct pci_dev* dev) {
+    return pci_read(dev, 0x20);
+}
+
+void pci_enable_bus_master(struct pci_dev* dev) {
+    pci_write(dev, 0x4, pci_read(dev, 0x4) | (1 << 2));
+}

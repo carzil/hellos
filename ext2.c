@@ -178,7 +178,9 @@ static int ext2_init(struct ext2_fs* fs) {
 
         struct ext2_dir_entry_head* head = fs->tmp;
         while (head < fs->tmp + ext2_block_size(fs)) {
-            printk(" * entry name='%s', inode=%d\n", &head->name, head->inode);
+            if (head->inode) {
+                printk(" * entry name='%s', inode=%d\n", &head->name, head->inode);
+            }
             head = (uint8_t*)head + head->rec_len;
         }
     }

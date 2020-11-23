@@ -20,3 +20,5 @@ struct pci_dev {
 void pci_print_devices();
 int pci_find_device(struct pci_dev* dev, uint8_t class, uint8_t subclass);
 void pci_set_irq(struct pci_dev* dev, int irq);
+uint32_t pci_read_bar4(struct pci_dev* dev);
+void pci_enable_bus_master(struct pci_dev* dev);
