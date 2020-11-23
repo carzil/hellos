@@ -49,10 +49,12 @@ void* kalloc() {
 }
 
 void kfree(void* p) {
-    // ...
+    struct fl_entry* entry = (struct fl_entry*)p;
+    entry->next = kalloc_head.freelist_head;
+    kalloc_head.freelist_head = entry;
 }
 
-uint32_t* alloc_page(uint32_t* pgdir, void* addr, int user) {
+uint32_t* alloc_page(uint32_t* pgdir, void* addr, int flags) {
     uint32_t* page_table = NULL;
     if (pgdir[PGDIR_IDX(addr)] & PT_PRESENT) {
         page_table = phys2virt((void*)ROUNDDOWN(pgdir[PGDIR_IDX(addr)]));
@@ -66,21 +68,18 @@ uint32_t* alloc_page(uint32_t* pgdir, void* addr, int user) {
         }
     }
 
-    int flags = PT_PRESENT;
-    if (user) {
-        flags |= PT_USER;
-    }
+    flags |= PT_PRESENT;
     pgdir[PGDIR_IDX(addr)] = ((uint32_t)virt2phys(page_table)) | flags;
     return &page_table[PT_IDX(addr)];
 }
 
-void map_continous(uint32_t* pgdir, void* addr, size_t size, void* phys_addr, int flags) {
+void _map_continous(uint32_t* pgdir, void* addr, size_t size, void* phys_addr, int flags) {
     addr = (void*)ROUNDDOWN((uint32_t)addr);
     phys_addr = (void*)ROUNDDOWN((uint32_t)phys_addr);
     size = ROUNDUP(size);
 
     while (size > 0) {
-        uint32_t* pte = alloc_page(pgdir, addr, flags & PT_USER);
+        uint32_t* pte = alloc_page(pgdir, addr, flags);
         *pte = ((uint32_t)phys_addr) | PT_PRESENT;
         *pte |= flags;
         addr += PAGE_SIZE;
@@ -90,6 +89,10 @@ void map_continous(uint32_t* pgdir, void* addr, size_t size, void* phys_addr, in
 }
 
 uint32_t* kernel_pgdir = NULL;
+
+void map_continous(void* addr, size_t size, void* phys_addr, int flags) {
+    _map_continous(kernel_pgdir, addr, size, phys_addr, flags);
+}
 
 void load_cr3(uint32_t* pgdir) {
     asm volatile (
@@ -103,13 +106,12 @@ void load_cr3(uint32_t* pgdir) {
 void init_kernel_paging() {
     kernel_pgdir = kalloc();
     memset(kernel_pgdir, '\0', PAGE_SIZE);
-    map_continous(kernel_pgdir, (void*)KERNEL_HIGH, 4 * (1 << 20), 0x0, PT_WRITEABLE);
-    map_continous(kernel_pgdir, &USERSPACE_START, 4096, virt2phys(&USERSPACE_START), PT_USER | PT_WRITEABLE);
+    map_continous((void*)KERNEL_HIGH, 4 * (1 << 20), 0x0, PT_WRITEABLE);
     load_cr3(virt2phys(kernel_pgdir));
 }
 
 void identity_map(void* addr, size_t sz) {
-    map_continous(kernel_pgdir, addr, sz, addr, PT_WRITEABLE);
+    _map_continous(kernel_pgdir, addr, sz, addr, PT_WRITEABLE);
 }
 
 uint32_t read_cr2() {
@@ -128,5 +130,7 @@ void pagefault_irq(struct regs* regs) {
 
     if (!is_userspace(regs)) {
         panic("pagefault in kernel space\n    cr2=0x%x, eip=0x%x, err_code=%d", addr, regs->eip, regs->error_code);
+    } else {
+        panic("pagefault in user space\n    cr2=0x%x, eip=0x%x, err_code=%d", addr, regs->eip, regs->error_code);
     }
 }

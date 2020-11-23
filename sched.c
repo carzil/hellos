@@ -5,7 +5,7 @@
 #include "paging.h"
 #include "panic.h"
 #include "gdt.h"
-#include "bug.h"
+#include "panic.h"
 #include "init.h"
 
 #define MAX_TASKS          256
@@ -17,6 +17,10 @@ static struct task tasks[MAX_TASKS];
 static void task_init() {
     if (current->pid == 1) {
         init_late();
+        int ret = load_image("/bin/init");
+        if (ret < 0) {
+            panic("cannot start /bin/init");
+        }
     }
 }
 
@@ -97,7 +101,6 @@ void scheduler_start() {
     if (task_allocate(&init) != 0) {
         panic("cannot allocate init task");
     }
-    init->regs->eip = (uint32_t)userspace_fn;
 
     for (;;) {
         int found = 0;

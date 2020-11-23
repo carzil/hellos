@@ -33,3 +33,4 @@ void* kalloc();
 void kfree(void* p);
 void init_kernel_paging();
 void identity_map(void* addr, size_t sz);
+void map_continous(void* addr, size_t size, void* phys_addr, int flags);

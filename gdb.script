@@ -1,6 +1,6 @@
 symbol-file kernel.sym
 tar rem :1234
-la regs
+la src
 foc cmd
-b ata.c:71
+b pagefault_irq
 c

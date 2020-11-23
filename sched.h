@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "irq.h"
+
 typedef enum state {
     TASK_NOT_ALLOCATED = 0,
     TASK_RUNNING       = 1,

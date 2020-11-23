@@ -40,13 +40,6 @@ SECTIONS
     }
     PROVIDE(KERNEL_END = .);
 
-    . += 4M;
-    . = ALIGN(0x1000);
-    PROVIDE(USERSPACE_START = .);
-    .userspace.text : AT(ADDR(.userspace.text) - KERNEL_HIGH) {
-        *(.userspace.text)
-    }
-
     /DISCARD/ : {
         *(.eh_frame)
         *(.note.gnu.*)

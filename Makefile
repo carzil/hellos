@@ -4,8 +4,8 @@ LD=gcc -m32 -fno-pic -Wl,-static -Wl,-Bsymbolic -nostartfiles
 OBJCOPY=objcopy
 SHELL := /bin/bash
 
-C_SOURCES   := $(shell find $(SUBSYSTEMS) -name "*.c")
-ASM_SOURCES := $(shell find $(SUBSYSTEMS) -name "*.S")
+C_SOURCES   := $(shell ls *.c)
+ASM_SOURCES := $(shell ls *.S)
 C_OBJS      := $(C_SOURCES:.c=.c.o)
 ASM_OBJS    := $(ASM_SOURCES:.S=.S.o)
 
