@@ -1,6 +1,11 @@
-AS=gcc -m32 -c -g -mgeneral-regs-only
-CC=gcc -m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -fno-pie -Wall -Wextra -static-libgcc
-LD=gcc -m32 -fno-pic -Wl,-static -Wl,-Bsymbolic -nostartfiles
+CC=gcc
+AS=gcc
+LD=gcc
+GRUB_MKRESCUE=grub-mkrescue
+
+ASFLAGS=-m32 -c -g -mgeneral-regs-only
+CCFLAGS=-m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -fno-pie -Wall -Wextra -static-libgcc -Wno-int-conversion -Wno-implicit-function-declaration -Wno-unused-function -Wno-discarded-qualifiers -Wno-unused-parameter -Wno-incompatible-pointer-types
+LDFLAGS=-m32 -fno-pic -Wl,-static -Wl,-Bsymbolic -nostartfiles
 OBJCOPY=objcopy
 SHELL := /bin/bash
 
@@ -12,11 +17,12 @@ ASM_OBJS    := $(ASM_SOURCES:.S=.S.o)
 image: build
 	mkdir -p isodir/boot/grub
 	cp grub.cfg isodir/boot/grub
-	cp kernel.bin isodir/boot && grub-mkrescue -o kernel.iso isodir
+	cp kernel.bin isodir/boot
+	$(GRUB_MKRESCUE) -o kernel.iso isodir
 	rm -rf isodir
 
 build: .c-depend .S-depend $(C_OBJS) $(ASM_OBJS) linker.ld
-	$(LD) -T <(cpp -P -E linker.ld) -o kernel.bin -ffreestanding -O2 -nostdlib -lgcc $(ASM_OBJS) $(C_OBJS)
+	$(LD) $(LDFLAGS) -T <(cpp -P -E linker.ld) -o kernel.bin -ffreestanding -O2 -nostdlib -lgcc $(ASM_OBJS) $(C_OBJS)
 	$(OBJCOPY) --only-keep-debug kernel.bin kernel.sym
 	$(OBJCOPY) --strip-debug kernel.bin
 
