@@ -12,7 +12,9 @@ Key Features:
 
 This project is open source under the terms of [MIT License](./LICENSE). You can freely redistribute and use this code, but do not forget about your School or University rules on copyright and Honor Code while submit your homeworks.
 
-Build Instructions:
+## Build Instructions:
+
+### Linux Host
 
 Kernel build requires modern GCC toolchain with 32-bit x86 build environment
 and grub tools.
@@ -27,5 +29,18 @@ Example:
 > make CC=gcc-10 AS=gcc-10 LD=gcc-10 GRUB_MKRESCUE=grub2-mkrescue
 ```
 
+### MacOS Host
 
+Mac OS build requires ELF-related cross toolchain and GNU version of `sed`.
+
+```
+> brew tap nativeos/i386-elf-toolchain 
+> brew install i386-elf-binutils i386-elf-gcc i386-elf-grub xorriso gnu-sed
+```
+
+To build image, run:
+
+```
+> make CC=i386-elf-gcc AS=i386-elf-gcc LD=i386-elf-gcc SED=gsed OBJCOPY=i386-elf-objcopy
+```
 

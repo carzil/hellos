@@ -2,9 +2,10 @@ CC=gcc
 AS=gcc
 LD=gcc
 GRUB_MKRESCUE=grub-mkrescue
+SED=sed
 
 ASFLAGS=-m32 -c -g -mgeneral-regs-only
-CCFLAGS=-m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -fno-pie -Wall -Wextra -static-libgcc -Wno-int-conversion -Wno-implicit-function-declaration -Wno-unused-function -Wno-discarded-qualifiers -Wno-unused-parameter -Wno-incompatible-pointer-types
+CCFLAGS=-m32 -g -mgeneral-regs-only -mno-red-zone -std=gnu99 -ffreestanding -fno-pie -Wall -Wextra -static-libgcc -Wno-int-conversion -Wno-implicit-function-declaration -Wno-unused-function -Wno-discarded-qualifiers -Wno-unused-parameter -Wno-incompatible-pointer-types -march=pentium4
 LDFLAGS=-m32 -fno-pic -Wl,-static -Wl,-Bsymbolic -nostartfiles
 OBJCOPY=objcopy
 SHELL := /bin/bash
@@ -35,12 +36,12 @@ build: .c-depend .S-depend $(C_OBJS) $(ASM_OBJS) linker.ld
 .c-depend: $(C_SOURCES)
 	rm -f ./.depend.c
 	$(CC) $(CFLAGS) -MM $^ > ./.c-depend
-	sed -i -E 's/^(.*)\.o/\1.c.o/g' .c-depend
+	$(SED) -i -E 's/^(.*)\.o/\1.c.o/g' .c-depend
 
 .S-depend: $(ASM_SOURCES)
 	rm -f ./.depend.S
 	$(CC) $(CFLAGS) -MM $^ > ./.S-depend
-	sed -i -E 's/^(.*)\.o/\1.S.o/g' .S-depend
+	$(SED) -i -E 's/^(.*)\.o/\1.S.o/g' .S-depend
 
 clean:
 	rm -f *.o
